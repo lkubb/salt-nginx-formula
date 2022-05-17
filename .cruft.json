@@ -1,0 +1,72 @@
+{
+  "template": "https://github.com/lkubb/salt-template-formula",
+  "commit": "50a694adefdf54f1ca465db433c033ca764942bc",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "_extensions": [
+        "local_extensions.YAMLDumper"
+      ],
+      "_jinja2_env_vars": {
+        "block_start_string": "{!",
+        "block_end_string": "!}",
+        "variable_start_string": "{=",
+        "variable_end_string": "=}",
+        "comment_start_string": "{@",
+        "comment_end_string": "@}"
+      },
+      "name": "Nginx",
+      "abbr": "nginx",
+      "abbr_pysafe": "nginx",
+      "pkg": "",
+      "needs_repo": "",
+      "config": "/etc/nginx/nginx.conf",
+      "service": "nginx",
+      "subcomponent": "",
+      "subcomponent_config": "",
+      "git_username": "lkubb",
+      "_lookup": {
+        "pkg": {
+          "name": "nginx",
+          "openssl": "openssl"
+        },
+        "certs": "certs",
+        "snippets": "snippets",
+        "user": "nginx",
+        "group": "nginx",
+        "pid_file": "/run/nginx.pid"
+      },
+      "_settings": {
+        "config": {
+          "worker_processes": "auto",
+          "include": [
+            "modules-enabled/*.conf"
+          ],
+          "events": {
+            "worker_connections": 768
+          },
+          "http": {
+            "sendfile": "on",
+            "tcp_nopush": "on",
+            "types_hash_max_size": 2048,
+            "default_type": "application/octet-stream",
+            "access_log": "/var/log/nginx/access.log",
+            "error_log": "/var/log/nginx/error.log",
+            "gzip": "on",
+            "include": [
+              "mime.types",
+              "conf.d/*.conf",
+              "sites-enabled/*"
+            ]
+          }
+        },
+        "dhparam": {},
+        "servers": {},
+        "snippets": {},
+        "disable_default_host": true
+      },
+      "_template": "https://github.com/lkubb/salt-template-formula"
+    }
+  },
+  "directory": null
+}

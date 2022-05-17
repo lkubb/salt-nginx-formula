@@ -1,0 +1,14 @@
+{#- Render certs/snippets dirs relative to config root if not absolute -#}
+{%- for type in ["certs", "snippets"] %}
+  {%- if not mapdata.lookup[type].startswith("/") %}
+    {%- do mapdata.lookup.update({type: salt["file.dirname"](mapdata.lookup.config) | path_join(mapdata.lookup[type])}) %}
+  {%- endif %}
+{%- endfor %}
+
+{%- if "user" not in mapdata.config %}
+  {%- do mapdata.config.update({"user": mapdata.lookup.user}) %}
+{%- endif %}
+
+{%- if "pid" not in mapdata.config %}
+  {%- do mapdata.config.update({"pid": mapdata.lookup.pid_file}) %}
+{%- endif %}

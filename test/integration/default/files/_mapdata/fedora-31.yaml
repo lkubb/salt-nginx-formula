@@ -1,0 +1,64 @@
+# yamllint disable rule:indentation rule:line-length
+# Fedora-31
+---
+values:
+  added_in_defaults: defaults_value
+  added_in_lookup: lookup_value
+  added_in_pillar: pillar_value
+  lookup:
+    arch: amd64
+    rootgroup: root
+    config: '/etc/nginx/nginx.conf'
+    service:
+      name: nginx
+    certs: certs
+    group: nginx
+    pid_file: /run/nginx.pid
+    pkg:
+      name: nginx
+      openssl: openssl
+    snippets: snippets
+    user: nginx
+  config:
+    events:
+      worker_connections: 768
+    http:
+      access_log: /var/log/nginx/access.log
+      default_type: application/octet-stream
+      error_log: /var/log/nginx/error.log
+      gzip: 'on'
+      include:
+        - mime.types
+        - conf.d/*.conf
+        - sites-enabled/*
+      sendfile: 'on'
+      tcp_nopush: 'on'
+      types_hash_max_size: 2048
+    include:
+      - modules-enabled/*.conf
+    worker_processes: auto
+  dhparam: {}
+  disable_default_host: true
+  servers: {}
+  snippets: {}
+  map_jinja:
+    sources:
+    - Y:G@osarch
+    - Y:G@os_family
+    - Y:G@os
+    - Y:G@osfinger
+    - C@nginx
+    - Y:G@id
+  master: template-master
+  tofs:
+    files_switch:
+    - any/path/can/be/used/here
+    - id
+    - roles
+    - osfinger
+    - os
+    - os_family
+    source_files:
+      nginx-config-file-file-managed:
+      - example.tmpl.jinja
+  winner: pillar

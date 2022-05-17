@@ -1,0 +1,45 @@
+# -*- coding: utf-8 -*-
+# vim: ft=yaml
+#
+# Set default values.
+---
+values:
+  lookup:
+    rootgroup: root
+    config: '/etc/nginx/nginx.conf'
+    service:
+      name: nginx
+    certs: certs
+    group: nginx
+    pid_file: /run/nginx.pid
+    pkg:
+      name: nginx
+      openssl: openssl
+    snippets: snippets
+    user: nginx
+  config:
+    events:
+      worker_connections: 768
+    http:
+      access_log: /var/log/nginx/access.log
+      default_type: application/octet-stream
+      error_log: /var/log/nginx/error.log
+      gzip: 'on'
+      include:
+        - mime.types
+        - conf.d/*.conf
+        - sites-enabled/*
+      sendfile: 'on'
+      tcp_nopush: 'on'
+      types_hash_max_size: 2048
+    include:
+      - modules-enabled/*.conf
+    worker_processes: auto
+  dhparam: {}
+  disable_default_host: true
+  servers: {}
+  snippets: {}
+  # Just here for testing
+  added_in_defaults: defaults_value
+  winner: defaults
+...
