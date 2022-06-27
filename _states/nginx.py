@@ -1,8 +1,8 @@
 """
-``asdf`` Salt State Module
+``nginx`` Salt State Module
 ==========================
 
-Manage asdf plugins and tool versions.
+Manage nginx sites.
 """
 
 # import logging
