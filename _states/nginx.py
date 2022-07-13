@@ -209,6 +209,10 @@ def site(name, config=None, sites_enabled=None, source=None, template=None, cont
     site_file, enable_file = __utils__["nginx.get_site_enable_files"](name, config, sites_enabled)
 
     if source is not None:
+        # apparently there is a __states__ dunder @FIXME
+        # https://docs.saltproject.io/en/latest/ref/states/writing.html#cross-calling-state-modules
+        # ret can also include sub_state_run
+        # https://docs.saltproject.io/en/latest/ref/states/writing.html#sub-state-runs
         ret_file = __salt__["state.single"]("file.managed", str(site_file), source=source, template=template, context=context, user="root", group=__salt__["user.primary_group"]("root"), mode="0644", test=__opts__["test"])
         ret = list(ret_file.values())[0]
         ret["name"] = name
