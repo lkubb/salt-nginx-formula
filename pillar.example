@@ -92,8 +92,11 @@ nginx:
   snippets: {}
     # This is a convenience to automatically create webroot dirs,
     # e.g. when using certbot webroot auth module with reverse proxy only hosts.
-    # It can be a list of paths or set to "from_servers". The latter will
-    # result in a directory for every key in nginx:servers inside nginx:lookup:webroot.
+    # It can be a list of paths or one of ["from_servers", "from_certbot"].
+    # "from_servers" will result in a directory for every key in nginx:servers
+    # inside nginx:lookup:webroot. "from_certbot" will cross-load the certbot
+    # formula configuration and create a directory for every certbot:certs.
+    # The certbot formula is found at https://github.com/lkubb/certbot-formula
   webroots: []
 
   lookup:

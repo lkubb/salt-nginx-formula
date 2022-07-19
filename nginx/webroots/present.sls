@@ -15,6 +15,12 @@ include:
 {%-     for server in nginx.servers %}
 {%-       do webroots.append(nginx.lookup.webroot | path_join(server)) %}
 {%-     endfor %}
+{%-   elif "from_certbot" == nginx.webroots %}
+{%-     set webroots = [] %}
+{%-     from "certbot/map.jinja" import mapdata as certbot with context %}
+{%-     for cert in certbot.certs %}
+{%-       do webroots.append(nginx.lookup.webroot | path_join(cert)) %}
+{%-     endfor %}
 {%-   endif %}
 Specified nginx webroot paths are present:
   file.directory:
