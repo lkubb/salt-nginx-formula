@@ -13,6 +13,7 @@ from salt.exceptions import CommandExecutionError
 
 try:
     import crossplane
+
     HAS_CROSSPLANE = True
 except ImportError:
     HAS_CROSSPLANE = False
@@ -93,10 +94,10 @@ def configtest(nginx_conf=None):
     """
     ret = {}
 
-    cmd = [__detect_os(), '-t']
+    cmd = [__detect_os(), "-t"]
 
     if nginx_conf:
-        cmd.extend(['-c', "'{}'".format(nginx_conf)])
+        cmd.extend(["-c", "'{}'".format(nginx_conf)])
 
     out = __salt__["cmd.run_all"](" ".join(cmd))
 
@@ -129,7 +130,9 @@ def default_config_dir():
 
     if confd:
         return str(confd)
-    raise CommandExecutionError("Could not find the default configuration dir for nginx.")
+    raise CommandExecutionError(
+        "Could not find the default configuration dir for nginx."
+    )
 
 
 def default_config_file():
@@ -149,7 +152,9 @@ def default_config_file():
 
     if file:
         return str(file)
-    raise CommandExecutionError("Could not find the default configuration file for nginx.")
+    raise CommandExecutionError(
+        "Could not find the default configuration file for nginx."
+    )
 
 
 def disable_site(name, nginx_conf=None, sites_enabled=None):
@@ -184,7 +189,9 @@ def disable_site(name, nginx_conf=None, sites_enabled=None):
     if sites_enabled is None:
         sites_enabled = __utils__["nginx.uses_sites_enabled"](nginx_conf)
 
-    site_file, enable_file = __utils__["nginx.get_site_enable_files"](name, nginx_conf, sites_enabled)
+    site_file, enable_file = __utils__["nginx.get_site_enable_files"](
+        name, nginx_conf, sites_enabled
+    )
 
     if not site_file.exists():
         raise CommandExecutionError("There is no site named {}.".format(name))
@@ -205,7 +212,9 @@ def disable_site(name, nginx_conf=None, sites_enabled=None):
         elif not sites_enabled:
             enable_file.rename(site_file)
     except PermissionError as e:
-        raise CommandExecutionError("Enabling site failed, permission denied:\n\n{}".format(e))
+        raise CommandExecutionError(
+            "Enabling site failed, permission denied:\n\n{}".format(e)
+        )
 
     return str(enable_file) not in list_config_files(nginx_conf)
 
@@ -242,13 +251,17 @@ def enable_site(name, nginx_conf=None, sites_enabled=None):
     if sites_enabled is None:
         sites_enabled = __utils__["nginx.uses_sites_enabled"](nginx_conf)
 
-    site_file, enable_file = __utils__["nginx.get_site_enable_files"](name, nginx_conf, sites_enabled)
+    site_file, enable_file = __utils__["nginx.get_site_enable_files"](
+        name, nginx_conf, sites_enabled
+    )
 
     if str(enable_file) in list_config_files(nginx_conf):
         return True
 
     if not site_file.exists():
-        raise CommandExecutionError("Could not find site configuration file '{}'.".format(str(site_file)))
+        raise CommandExecutionError(
+            "Could not find site configuration file '{}'.".format(str(site_file))
+        )
 
     if sites_enabled:
         enable_command = enable_file.symlink_to
@@ -260,7 +273,9 @@ def enable_site(name, nginx_conf=None, sites_enabled=None):
     try:
         enable_command(target)
     except PermissionError as e:
-        raise CommandExecutionError("Enabling site failed, permission denied:\n\n{}".format(e))
+        raise CommandExecutionError(
+            "Enabling site failed, permission denied:\n\n{}".format(e)
+        )
 
     try:
         return str(enable_file) in list_config_files(nginx_conf)
@@ -288,7 +303,7 @@ def list_config_files(nginx_conf=None):
         Defaults to nginx default.
     """
 
-    cmd = [__detect_os(), '-T']
+    cmd = [__detect_os(), "-T"]
 
     if nginx_conf is not None:
         cmd.extend(["-c", "'{}'".format(str(nginx_conf))])
@@ -296,7 +311,9 @@ def list_config_files(nginx_conf=None):
     out = __salt__["cmd.run_all"](" ".join(cmd))
 
     if out["retcode"]:
-        raise CommandExecutionError("Error running nginx. Output:\n\n{}".format(out["stderr"]))
+        raise CommandExecutionError(
+            "Error running nginx. Output:\n\n{}".format(out["stderr"])
+        )
 
     return re.findall(r"^# configuration file (.*):", out["stdout"], re.MULTILINE)
 
@@ -330,15 +347,21 @@ def remove_site(name, nginx_conf=None, sites_enabled=None):
         sites_enabled = __utils__["nginx.uses_sites_enabled"](nginx_conf)
 
     if not disable_site(name, nginx_conf, sites_enabled):
-        raise CommandExecutionError("Could not disable the configuration for {}.".format(name))
+        raise CommandExecutionError(
+            "Could not disable the configuration for {}.".format(name)
+        )
 
-    site_file, _ = __utils__["nginx.get_site_enable_files"](name, nginx_conf, sites_enabled)
+    site_file, _ = __utils__["nginx.get_site_enable_files"](
+        name, nginx_conf, sites_enabled
+    )
 
     if site_file.exists():
         try:
             site_file.unlink()
         except PermissionError as e:
-            raise CommandExecutionError("Removing site failed, permission denied:\n\n{}".format(e))
+            raise CommandExecutionError(
+                "Removing site failed, permission denied:\n\n{}".format(e)
+            )
 
     return True
 
@@ -368,7 +391,9 @@ def signal(signal=None):
 
     # A non-zero return code means fail
     if out["retcode"]:
-        raise CommandExecutionError("Failed signaling '{}' to nginx:\n\n{}".format(signal, out["stderr"]))
+        raise CommandExecutionError(
+            "Failed signaling '{}' to nginx:\n\n{}".format(signal, out["stderr"])
+        )
 
     return True
 
@@ -399,7 +424,9 @@ def site_enabled(name, nginx_conf=None, sites_enabled=None):
     if nginx_conf is None:
         nginx_conf = default_config_file()
 
-    _, enable_file = __utils__["nginx.get_site_enable_files"](name, nginx_conf, sites_enabled)
+    _, enable_file = __utils__["nginx.get_site_enable_files"](
+        name, nginx_conf, sites_enabled
+    )
 
     # If a site is enabled and its file causes errors, it will be listed
     # in stderr. This is needed to be able to remove a file again.
@@ -440,7 +467,9 @@ def site_exists(name, nginx_conf=None, sites_enabled=None):
     if sites_enabled is None:
         sites_enabled = __utils__["nginx.uses_sites_enabled"](nginx_conf)
 
-    site_file, enable_file = __utils__["nginx.get_site_enable_files"](name, nginx_conf, sites_enabled)
+    site_file, enable_file = __utils__["nginx.get_site_enable_files"](
+        name, nginx_conf, sites_enabled
+    )
 
     if sites_enabled:
         return site_file.exists()

@@ -52,7 +52,9 @@ def site_enabled(name, nginx_conf=None, sites_enabled=None, now=True):
     ret = {"name": name, "result": True, "comment": "", "changes": {}}
 
     try:
-        needs_reload = not __salt__["nginx.site_enabled"](name, nginx_conf, sites_enabled)
+        needs_reload = not __salt__["nginx.site_enabled"](
+            name, nginx_conf, sites_enabled
+        )
 
         if not needs_reload:
             ret["comment"] = "Site is already enabled."
@@ -62,7 +64,11 @@ def site_enabled(name, nginx_conf=None, sites_enabled=None, now=True):
         elif __opts__["test"]:
             if not __salt__["nginx.enable_site"](name, nginx_conf, sites_enabled):
                 ret["result"] = False
-                ret["comment"] = "Tried to enable site '{}', but the resulting configuration was invalid or did not contain it.".format(name)
+                ret[
+                    "comment"
+                ] = "Tried to enable site '{}', but the resulting configuration was invalid or did not contain it.".format(
+                    name
+                )
             else:
                 ret["result"] = None
                 ret["comment"] = "Site '{}' would have been enabled.".format(name)
@@ -73,7 +79,9 @@ def site_enabled(name, nginx_conf=None, sites_enabled=None, now=True):
             ret["changes"] = {"enabled": name}
         else:
             ret["result"] = False
-            ret["comment"] = "Could not enable site '{}'. Make sure it is valid.".format(name)
+            ret[
+                "comment"
+            ] = "Could not enable site '{}'. Make sure it is valid.".format(name)
     except salt.exceptions.CommandExecutionError as e:
         ret["result"] = False
         ret["comment"] = str(e)
@@ -88,7 +96,9 @@ def site_enabled(name, nginx_conf=None, sites_enabled=None, now=True):
                 ret["comment"] += "\nReloaded nginx configuration."
             except CommandExecutionError as e:
                 # This is e.g. caused by missing nginx process.
-                ret["comment"] += "\nFailed to reload nginx configuration though:\n\n{}".format(e)
+                ret[
+                    "comment"
+                ] += "\nFailed to reload nginx configuration though:\n\n{}".format(e)
 
     return ret
 
@@ -137,7 +147,11 @@ def site_disabled(name, nginx_conf=None, sites_enabled=None, now=True):
                 __salt__["nginx.enable_site"](name, nginx_conf, sites_enabled)
                 ret["result"] = False
                 ret["changes"] = {}
-                ret["comment"] = "Disabled site '{}', but the resulting config had errors. Reverted changes.".format(name)
+                ret[
+                    "comment"
+                ] = "Disabled site '{}', but the resulting config had errors. Reverted changes.".format(
+                    name
+                )
         else:
             ret["result"] = False
             ret["comment"] = "Something went wrong while calling nginx."
@@ -156,12 +170,23 @@ def site_disabled(name, nginx_conf=None, sites_enabled=None, now=True):
                 ret["comment"] += "\nReloaded nginx configuration."
             except CommandExecutionError as e:
                 # This is e.g. caused by missing nginx process.
-                ret["comment"] += "\nFailed to reload nginx configuration though:\n\n{}".format(e)
+                ret[
+                    "comment"
+                ] += "\nFailed to reload nginx configuration though:\n\n{}".format(e)
 
     return ret
 
 
-def site(name, nginx_conf=None, sites_enabled=None, source=None, template=None, context=None, enabled=True, now=True):
+def site(
+    name,
+    nginx_conf=None,
+    sites_enabled=None,
+    source=None,
+    template=None,
+    context=None,
+    enabled=True,
+    now=True,
+):
     """
     Manage a site served by nginx. This is currently a wrapper for other
     states to make the configuration more concise.
@@ -206,14 +231,26 @@ def site(name, nginx_conf=None, sites_enabled=None, source=None, template=None, 
 
     ret = {"name": name, "result": True, "comment": "", "changes": {}}
 
-    site_file, enable_file = __utils__["nginx.get_site_enable_files"](name, nginx_conf, sites_enabled)
+    site_file, enable_file = __utils__["nginx.get_site_enable_files"](
+        name, nginx_conf, sites_enabled
+    )
 
     if source is not None:
         # apparently there is a __states__ dunder @FIXME
         # https://docs.saltproject.io/en/latest/ref/states/writing.html#cross-calling-state-modules
         # ret can also include sub_state_run
         # https://docs.saltproject.io/en/latest/ref/states/writing.html#sub-state-runs
-        ret_file = __salt__["state.single"]("file.managed", str(site_file), source=source, template=template, context=context, user="root", group=__salt__["user.primary_group"]("root"), mode="0644", test=__opts__["test"])
+        ret_file = __salt__["state.single"](
+            "file.managed",
+            str(site_file),
+            source=source,
+            template=template,
+            context=context,
+            user="root",
+            group=__salt__["user.primary_group"]("root"),
+            mode="0644",
+            test=__opts__["test"],
+        )
         ret = list(ret_file.values())[0]
         ret["name"] = name
 
@@ -226,12 +263,22 @@ def site(name, nginx_conf=None, sites_enabled=None, source=None, template=None, 
 
     if False == ret_enable["result"]:
         ret["result"] = False
-        ret["comment"] = "Site configuration file {} in correct state, but could not {} it. Make sure there are no errors in your nginx configuration. Output was:\n\n{}".format("would be" if __opts__["test"] else "is", "enable" if enabled else "disable", ret_enable["comment"])
+        ret[
+            "comment"
+        ] = "Site configuration file {} in correct state, but could not {} it. Make sure there are no errors in your nginx configuration. Output was:\n\n{}".format(
+            "would be" if __opts__["test"] else "is",
+            "enable" if enabled else "disable",
+            ret_enable["comment"],
+        )
         if __opts__["test"]:
             if not site_file.exists():
-                ret["comment"] += "\n\nYou can probably ignore this since the file would have been created if we were not running with test=true."
+                ret[
+                    "comment"
+                ] += "\n\nYou can probably ignore this since the file would have been created if we were not running with test=true."
             else:
-                ret["comment"] += "\n\nIf you fixed some configuration errors since the last non-test run, you can probably ignore this warning."
+                ret[
+                    "comment"
+                ] += "\n\nIf you fixed some configuration errors since the last non-test run, you can probably ignore this warning."
         return ret
 
     ret["comment"] += "\n\n" + ret_enable["comment"]
@@ -293,6 +340,10 @@ def site_absent(name, nginx_conf=None, sites_enabled=None, now=True):
                 ret["comment"] += "\n\nReloaded nginx configuration."
             except CommandExecutionError as e:
                 # This is e.g. caused by missing nginx master process.
-                ret["comment"] += "\nFailed to reload nginx configuration though, is it running?\n\n{}".format(e)
+                ret[
+                    "comment"
+                ] += "\nFailed to reload nginx configuration though, is it running?\n\n{}".format(
+                    e
+                )
 
     return ret
