@@ -9,6 +9,8 @@
 include:
   - {{ sls_package_install }}
 
+{%- if "sync" != nginx.config %}
+
 nginx-config-file-file-managed:
   file.managed:
     - name: {{ nginx.lookup.config }}
@@ -25,3 +27,25 @@ nginx-config-file-file-managed:
       - sls: {{ sls_package_install }}
     - context:
         nginx: {{ nginx | json }}
+
+{%- else %}
+
+nginx-config-file-file-managed:
+  file.recurse:
+    - name: {{ salt["file.dirname"](nginx.lookup.config) }}
+    - source: {{ files_switch(['/etc/nginx'],
+                              lookup='nginx-config-file-file-managed'
+                 )
+              }}
+    - file_mode: '0644'
+    - dir_mode: '0755'
+    - user: root
+    - group: {{ nginx.lookup.rootgroup }}
+    - makedirs: True
+    - template: jinja
+    - include_empty: true
+    - require:
+      - sls: {{ sls_package_install }}
+    - context:
+        nginx: {{ nginx | json }}
+{%- endif %}

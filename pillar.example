@@ -3,7 +3,13 @@
 # yamllint disable rule:comments-indentation
 ---
 nginx:
-
+    # config can be specified as a dict or set to "sync".
+    # In case you specify a dict, it will just manage `nginx.conf`.
+    # "sync" will run a file.recurse, syncing the whole /etc/nginx directory
+    # with the one found by files_switch (TOFS). The searched paths match
+    # `salt://nginx/files/<tofs_var>/etc/nginx`.
+    # They are processed as Jinja templates, so make sure to wrap anything
+    # that is incorrectly parsed as Jinja in {% raw %}{% endraw %} tags.
   config:
     events:
       worker_connections: 768
