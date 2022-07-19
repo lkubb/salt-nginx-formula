@@ -5,10 +5,12 @@
   {%- endif %}
 {%- endfor %}
 
-{%- if "user" not in mapdata.config %}
-  {%- do mapdata.config.update({"user": mapdata.lookup.user}) %}
-{%- endif %}
+{%- if mapdata.config is mapping %}
+  {%- if "user" not in mapdata.config %}
+    {%- do mapdata.config.update({"user": mapdata.lookup.user}) %}
+  {%- endif %}
 
-{%- if "pid" not in mapdata.config %}
-  {%- do mapdata.config.update({"pid": mapdata.lookup.pid_file}) %}
+  {%- if "pid" not in mapdata.config %}
+    {%- do mapdata.config.update({"pid": mapdata.lookup.pid_file}) %}
+  {%- endif %}
 {%- endif %}
