@@ -77,7 +77,7 @@ def build_info():
     return ret
 
 
-def configtest(config=None):
+def configtest(nginx_conf=None):
     """
     test configuration and exit
 
@@ -87,7 +87,7 @@ def configtest(config=None):
 
         salt '*' nginx.configtest
 
-    config
+    nginx_conf
         Path to the top configuration file that includes other files.
         Defaults to nginx default.
     """
@@ -95,8 +95,8 @@ def configtest(config=None):
 
     cmd = [__detect_os(), '-t']
 
-    if config:
-        cmd.extend(['-c', "'{}'".format(config)])
+    if nginx_conf:
+        cmd.extend(['-c', "'{}'".format(nginx_conf)])
 
     out = __salt__["cmd.run_all"](" ".join(cmd))
 
@@ -152,7 +152,7 @@ def default_config_file():
     raise CommandExecutionError("Could not find the default configuration file for nginx.")
 
 
-def disable_site(name, config=None, sites_enabled=None):
+def disable_site(name, nginx_conf=None, sites_enabled=None):
     """
     Disable a site configuration file.
     If the configuration uses the sites_enabled pattern (default on
@@ -169,7 +169,7 @@ def disable_site(name, config=None, sites_enabled=None):
     name
         Name of the site configuration file (without file extension)
 
-    config
+    nginx_conf
         Path to the top configuration file that includes other files.
         Defaults to nginx default.
 
@@ -178,13 +178,13 @@ def disable_site(name, config=None, sites_enabled=None):
         it will be autodetected.
     """
 
-    if config is None:
-        config = default_config_file()
+    if nginx_conf is None:
+        nginx_conf = default_config_file()
 
     if sites_enabled is None:
-        sites_enabled = __utils__["nginx.uses_sites_enabled"](config)
+        sites_enabled = __utils__["nginx.uses_sites_enabled"](nginx_conf)
 
-    site_file, enable_file = __utils__["nginx.get_site_enable_files"](name, config, sites_enabled)
+    site_file, enable_file = __utils__["nginx.get_site_enable_files"](name, nginx_conf, sites_enabled)
 
     if not site_file.exists():
         raise CommandExecutionError("There is no site named {}.".format(name))
@@ -193,7 +193,7 @@ def disable_site(name, config=None, sites_enabled=None):
     # impossible and throw an exception. To be able to disable a faulty
     # site config, catch that error.
     try:
-        if str(enable_file) not in list_config_files(config):
+        if str(enable_file) not in list_config_files(nginx_conf):
             return True
     except CommandExecutionError as e:
         if str(enable_file) not in str(e):
@@ -207,10 +207,10 @@ def disable_site(name, config=None, sites_enabled=None):
     except PermissionError as e:
         raise CommandExecutionError("Enabling site failed, permission denied:\n\n{}".format(e))
 
-    return str(enable_file) not in list_config_files(config)
+    return str(enable_file) not in list_config_files(nginx_conf)
 
 
-def enable_site(name, config=None, sites_enabled=None):
+def enable_site(name, nginx_conf=None, sites_enabled=None):
     """
     Enable a site configuration file.
     If the configuration uses the sites_enabled pattern (default on
@@ -227,7 +227,7 @@ def enable_site(name, config=None, sites_enabled=None):
     name
         Name of the site configuration file (without file extension)
 
-    config
+    nginx_conf
         Path to the top configuration file that includes other files.
         Defaults to nginx default.
 
@@ -236,15 +236,15 @@ def enable_site(name, config=None, sites_enabled=None):
         it will be autodetected.
     """
 
-    if config is None:
-        config = default_config_file()
+    if nginx_conf is None:
+        nginx_conf = default_config_file()
 
     if sites_enabled is None:
-        sites_enabled = __utils__["nginx.uses_sites_enabled"](config)
+        sites_enabled = __utils__["nginx.uses_sites_enabled"](nginx_conf)
 
-    site_file, enable_file = __utils__["nginx.get_site_enable_files"](name, config, sites_enabled)
+    site_file, enable_file = __utils__["nginx.get_site_enable_files"](name, nginx_conf, sites_enabled)
 
-    if str(enable_file) in list_config_files(config):
+    if str(enable_file) in list_config_files(nginx_conf):
         return True
 
     if not site_file.exists():
@@ -263,14 +263,14 @@ def enable_site(name, config=None, sites_enabled=None):
         raise CommandExecutionError("Enabling site failed, permission denied:\n\n{}".format(e))
 
     try:
-        return str(enable_file) in list_config_files(config)
+        return str(enable_file) in list_config_files(nginx_conf)
     except CommandExecutionError as e:
         # We caused that error with enabling the file since above, it was working. Disable it.
-        disable_site(name, config, sites_enabled)
+        disable_site(name, nginx_conf, sites_enabled)
         return False
 
 
-def list_config_files(config=None):
+def list_config_files(nginx_conf=None):
     """
     Return a list of all active configuration files. This list is correct
     for a reloaded nginx and might be out of sync if the files have changed
@@ -283,15 +283,15 @@ def list_config_files(config=None):
 
         salt '*' nginx.list_config_files
 
-    config
+    nginx_conf
         Path to the top configuration file that includes other files.
         Defaults to nginx default.
     """
 
     cmd = [__detect_os(), '-T']
 
-    if config is not None:
-        cmd.extend(["-c", "'{}'".format(str(config))])
+    if nginx_conf is not None:
+        cmd.extend(["-c", "'{}'".format(str(nginx_conf))])
 
     out = __salt__["cmd.run_all"](" ".join(cmd))
 
@@ -301,7 +301,7 @@ def list_config_files(config=None):
     return re.findall(r"^# configuration file (.*):", out["stdout"], re.MULTILINE)
 
 
-def remove_site(name, config=None, sites_enabled=None):
+def remove_site(name, nginx_conf=None, sites_enabled=None):
     """
     Delete a site configuration file.
 
@@ -314,7 +314,7 @@ def remove_site(name, config=None, sites_enabled=None):
     name
         Name of the site configuration file (without file extension)
 
-    config
+    nginx_conf
         Path to the top configuration file that includes other files.
         Defaults to nginx default.
 
@@ -323,16 +323,16 @@ def remove_site(name, config=None, sites_enabled=None):
         it will be autodetected.
     """
 
-    if config is None:
-        config = default_config_file()
+    if nginx_conf is None:
+        nginx_conf = default_config_file()
 
     if sites_enabled is None:
-        sites_enabled = __utils__["nginx.uses_sites_enabled"](config)
+        sites_enabled = __utils__["nginx.uses_sites_enabled"](nginx_conf)
 
-    if not disable_site(name, config, sites_enabled):
+    if not disable_site(name, nginx_conf, sites_enabled):
         raise CommandExecutionError("Could not disable the configuration for {}.".format(name))
 
-    site_file, _ = __utils__["nginx.get_site_enable_files"](name, config, sites_enabled)
+    site_file, _ = __utils__["nginx.get_site_enable_files"](name, nginx_conf, sites_enabled)
 
     if site_file.exists():
         try:
@@ -373,7 +373,7 @@ def signal(signal=None):
     return True
 
 
-def site_enabled(name, config=None, sites_enabled=None):
+def site_enabled(name, nginx_conf=None, sites_enabled=None):
     """
     Check whether a site configuration file gets loaded by nginx
     during startup.
@@ -387,7 +387,7 @@ def site_enabled(name, config=None, sites_enabled=None):
     name
         Name of the site configuration file (without file extension)
 
-    config
+    nginx_conf
         Path to the top configuration file that includes other files.
         Defaults to nginx default.
 
@@ -396,22 +396,22 @@ def site_enabled(name, config=None, sites_enabled=None):
         it will be autodetected.
     """
 
-    if config is None:
-        config = default_config_file()
+    if nginx_conf is None:
+        nginx_conf = default_config_file()
 
-    _, enable_file = __utils__["nginx.get_site_enable_files"](name, config, sites_enabled)
+    _, enable_file = __utils__["nginx.get_site_enable_files"](name, nginx_conf, sites_enabled)
 
     # If a site is enabled and its file causes errors, it will be listed
     # in stderr. This is needed to be able to remove a file again.
     try:
-        return str(enable_file) in list_config_files(config)
+        return str(enable_file) in list_config_files(nginx_conf)
     except CommandExecutionError as e:
         if str(enable_file) in str(e):
             return True
         raise e
 
 
-def site_exists(name, config=None, sites_enabled=None):
+def site_exists(name, nginx_conf=None, sites_enabled=None):
     """
     Check whether a site configuration file gets loaded by nginx
     during startup.
@@ -425,7 +425,7 @@ def site_exists(name, config=None, sites_enabled=None):
     name
         Name of the site configuration file (without file extension)
 
-    config
+    nginx_conf
         Path to the top configuration file that includes other files.
         Defaults to nginx default.
 
@@ -434,13 +434,13 @@ def site_exists(name, config=None, sites_enabled=None):
         it will be autodetected.
     """
 
-    if config is None:
-        config = default_config_file()
+    if nginx_conf is None:
+        nginx_conf = default_config_file()
 
     if sites_enabled is None:
-        sites_enabled = __utils__["nginx.uses_sites_enabled"](config)
+        sites_enabled = __utils__["nginx.uses_sites_enabled"](nginx_conf)
 
-    site_file, enable_file = __utils__["nginx.get_site_enable_files"](name, config, sites_enabled)
+    site_file, enable_file = __utils__["nginx.get_site_enable_files"](name, nginx_conf, sites_enabled)
 
     if sites_enabled:
         return site_file.exists()

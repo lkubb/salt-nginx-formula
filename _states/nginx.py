@@ -23,7 +23,7 @@ def __virtual__():
     return False
 
 
-def site_enabled(name, config=None, sites_enabled=None, now=True):
+def site_enabled(name, nginx_conf=None, sites_enabled=None, now=True):
     """
     Make sure a site configuration file is loaded by nginx.
     If the configuration uses the sites_enabled pattern (default on
@@ -34,7 +34,7 @@ def site_enabled(name, config=None, sites_enabled=None, now=True):
     name
         The name of the configuration file for the site, without the extension.
 
-    config
+    nginx_conf
         Path to the top configuration file that includes other files.
         Defaults to the default one used by nginx on the system.
 
@@ -52,23 +52,23 @@ def site_enabled(name, config=None, sites_enabled=None, now=True):
     ret = {"name": name, "result": True, "comment": "", "changes": {}}
 
     try:
-        needs_reload = not __salt__["nginx.site_enabled"](name, config, sites_enabled)
+        needs_reload = not __salt__["nginx.site_enabled"](name, nginx_conf, sites_enabled)
 
         if not needs_reload:
             ret["comment"] = "Site is already enabled."
-        elif not __salt__["nginx.site_exists"](name, config, sites_enabled):
+        elif not __salt__["nginx.site_exists"](name, nginx_conf, sites_enabled):
             ret["result"] = False
             ret["comment"] = "A site named '{}' does not exist.".format(name)
         elif __opts__["test"]:
-            if not __salt__["nginx.enable_site"](name, config, sites_enabled):
+            if not __salt__["nginx.enable_site"](name, nginx_conf, sites_enabled):
                 ret["result"] = False
                 ret["comment"] = "Tried to enable site '{}', but the resulting configuration was invalid or did not contain it.".format(name)
             else:
                 ret["result"] = None
                 ret["comment"] = "Site '{}' would have been enabled.".format(name)
                 ret["changes"] = {"enabled": name}
-            __salt__["nginx.disable_site"](name, config, sites_enabled)
-        elif __salt__["nginx.enable_site"](name, config, sites_enabled):
+            __salt__["nginx.disable_site"](name, nginx_conf, sites_enabled)
+        elif __salt__["nginx.enable_site"](name, nginx_conf, sites_enabled):
             ret["comment"] = "Site '{}' has been enabled.".format(name)
             ret["changes"] = {"enabled": name}
         else:
@@ -93,7 +93,7 @@ def site_enabled(name, config=None, sites_enabled=None, now=True):
     return ret
 
 
-def site_disabled(name, config=None, sites_enabled=None, now=True):
+def site_disabled(name, nginx_conf=None, sites_enabled=None, now=True):
     """
     Make sure a site configuration file is not loaded by nginx.
     If the configuration uses the sites_enabled pattern (default on
@@ -104,7 +104,7 @@ def site_disabled(name, config=None, sites_enabled=None, now=True):
     name
         The name of the configuration file for the site, without the extension.
 
-    config
+    nginx_conf
         Path to the top configuration file that includes other files.
         Defaults to the default one used by nginx on the system.
 
@@ -122,7 +122,7 @@ def site_disabled(name, config=None, sites_enabled=None, now=True):
     ret = {"name": name, "result": True, "comment": "", "changes": {}}
 
     try:
-        needs_reload = __salt__["nginx.site_enabled"](name, config, sites_enabled)
+        needs_reload = __salt__["nginx.site_enabled"](name, nginx_conf, sites_enabled)
 
         if not needs_reload:
             ret["comment"] = "Site is already disabled."
@@ -130,11 +130,11 @@ def site_disabled(name, config=None, sites_enabled=None, now=True):
             ret["result"] = None
             ret["comment"] = "Site '{}' would have been disabled.".format(name)
             ret["changes"] = {"disabled": name}
-        elif __salt__["nginx.disable_site"](name, config, sites_enabled):
+        elif __salt__["nginx.disable_site"](name, nginx_conf, sites_enabled):
             ret["comment"] = "Site '{}' has been disabled.".format(name)
             ret["changes"] = {"disabled": name}
-            if not __salt__["nginx.configtest"](config)["result"]:
-                __salt__["nginx.enable_site"](name, config, sites_enabled)
+            if not __salt__["nginx.configtest"](nginx_conf)["result"]:
+                __salt__["nginx.enable_site"](name, nginx_conf, sites_enabled)
                 ret["result"] = False
                 ret["changes"] = {}
                 ret["comment"] = "Disabled site '{}', but the resulting config had errors. Reverted changes.".format(name)
@@ -161,7 +161,7 @@ def site_disabled(name, config=None, sites_enabled=None, now=True):
     return ret
 
 
-def site(name, config=None, sites_enabled=None, source=None, template=None, context=None, enabled=True, now=True):
+def site(name, nginx_conf=None, sites_enabled=None, source=None, template=None, context=None, enabled=True, now=True):
     """
     Manage a site served by nginx. This is currently a wrapper for other
     states to make the configuration more concise.
@@ -175,7 +175,7 @@ def site(name, config=None, sites_enabled=None, source=None, template=None, cont
     name
         The name of the configuration file for the site, without the extension and absolute path.
 
-    config
+    nginx_conf
         Path to the top configuration file that includes other files.
         Defaults to the default one used by nginx on the system.
 
@@ -206,7 +206,7 @@ def site(name, config=None, sites_enabled=None, source=None, template=None, cont
 
     ret = {"name": name, "result": True, "comment": "", "changes": {}}
 
-    site_file, enable_file = __utils__["nginx.get_site_enable_files"](name, config, sites_enabled)
+    site_file, enable_file = __utils__["nginx.get_site_enable_files"](name, nginx_conf, sites_enabled)
 
     if source is not None:
         # apparently there is a __states__ dunder @FIXME
@@ -222,7 +222,7 @@ def site(name, config=None, sites_enabled=None, source=None, template=None, cont
 
     site_state = site_enabled if enabled else site_disabled
 
-    ret_enable = site_state(name, config, sites_enabled, now)
+    ret_enable = site_state(name, nginx_conf, sites_enabled, now)
 
     if False == ret_enable["result"]:
         ret["result"] = False
@@ -239,7 +239,7 @@ def site(name, config=None, sites_enabled=None, source=None, template=None, cont
     return ret
 
 
-def site_absent(name, config=None, sites_enabled=None, now=True):
+def site_absent(name, nginx_conf=None, sites_enabled=None, now=True):
     """
     Make sure a site is not served by nginx and its configuration file is absent.
     If you just want to disable it, use ``nginx.site_disabled``.
@@ -247,7 +247,7 @@ def site_absent(name, config=None, sites_enabled=None, now=True):
     name
         The name of the configuration file for the site, without the extension and absolute path.
 
-    config
+    nginx_conf
         Path to the top configuration file that includes other files.
         Defaults to the default one used by nginx on the system.
 
@@ -265,15 +265,15 @@ def site_absent(name, config=None, sites_enabled=None, now=True):
     ret = {"name": name, "result": True, "comment": "", "changes": {}}
 
     try:
-        needs_reload = __salt__["nginx.site_enabled"](name, config, sites_enabled)
+        needs_reload = __salt__["nginx.site_enabled"](name, nginx_conf, sites_enabled)
 
-        if not __salt__["nginx.site_exists"](name, config, sites_enabled):
+        if not __salt__["nginx.site_exists"](name, nginx_conf, sites_enabled):
             ret["comment"] = "Site {} is already absent.".format(name)
         elif __opts__["test"]:
             ret["result"] = None
             ret["comment"] = "Site {} would have been removed.".format(name)
             ret["changes"] = {"removed": name}
-        elif __salt__["nginx.remove_site"](name, config, sites_enabled):
+        elif __salt__["nginx.remove_site"](name, nginx_conf, sites_enabled):
             ret["comment"] = "Site {} has been removed".format(name)
             ret["changes"] = {"removed": name}
         else:

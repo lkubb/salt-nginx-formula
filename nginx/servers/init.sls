@@ -12,19 +12,19 @@ include:
 Nginx default host is managed:
   nginx.site:
     - name: default
-    - config: {{ nginx.lookup.config }}
+    - nginx_conf: {{ nginx.lookup.config }}
     - enabled: {{ false == nginx.disable_default_host }}
     - onlyif:
       - fun: nginx.site_exists
         name: default
-        config: {{ nginx.lookup.config }}
+        nginx_conf: {{ nginx.lookup.config }}
 
 {%- for name, config in nginx.servers.items() %}
 
 Nginx server {{ name }} is managed:
   nginx.site:
     - name: {{ name }}
-    - config: {{ nginx.lookup.config }}
+    - nginx_conf: {{ nginx.lookup.config }}
 {%-   if config.get("source") %}
     - source: {{ config.source }}
 {%-   else %}
