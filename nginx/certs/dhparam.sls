@@ -46,7 +46,11 @@ DH param {{ name }} is managed:
   file.managed:
     - name: {{ nginx.lookup.certs | path_join(name ~ ".pem") }}
 {%-   if config is string %}
+{%-     if "://" in config %}
+    - source: {{ config }}
+{%-     else %}
     - contents_pillar: {{ config }}
+{%-     endif %}
 {%-   else %}
     - replace: false
 {%-   endif %}
