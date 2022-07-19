@@ -19,6 +19,7 @@ nginx:
     remove_all_data_for_sure: false
     snippets: snippets
     user: nginx
+    webroot: /var/www
   config:
     events:
       worker_connections: 768

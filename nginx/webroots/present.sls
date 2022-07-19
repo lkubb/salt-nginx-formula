@@ -9,10 +9,16 @@ include:
   - {{ sls_package_install }}
 
 {%- if nginx.webroots %}
-
+{%-   set webroots = nginx.webroots %}
+{%-   if "from_servers" == nginx.webroots %}
+{%-     set webroots = [] %}
+{%-     for server in nginx.servers %}
+{%-       do webroots.append(nginx.lookup.webroot | path_join(server)) %}
+{%-     endfor %}
+{%-   endif %}
 Specified nginx webroot paths are present:
   file.directory:
-    - names: {{ nginx.webroots }}
+    - names: {{ webroots | json }}
     - user: {{ nginx.lookup.user }}
     - group: {{ nginx.lookup.group }}
     - makedirs: true

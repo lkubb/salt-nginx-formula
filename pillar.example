@@ -32,6 +32,10 @@ nginx:
   disable_default_host: true
   servers: {}
   snippets: {}
+    # This is a convenience to automatically create webroot dirs,
+    # e.g. when using certbot webroot auth module with reverse proxy only hosts.
+    # It can be a list of paths or set to "from_servers". The latter will
+    # result in a directory for every key in nginx:servers inside nginx:lookup:webroot.
   webroots: []
 
   lookup:
@@ -44,6 +48,7 @@ nginx:
     remove_all_data_for_sure: false
     snippets: snippets
     user: nginx
+    webroot: /var/www
 
   tofs:
       # The files_switch key serves as a selector for alternative

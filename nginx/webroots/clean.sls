@@ -11,10 +11,16 @@ include:
 {#- This can lead to data loss, so hide it behind a switch #}
 
 {%- if nginx.webroots and nginx.lookup.remove_all_data_for_sure %}
-
+{%-   set webroots = nginx.webroots %}
+{%-   if "from_servers" == nginx.webroots %}
+{%-     set webroots = [] %}
+{%-     for server in nginx.servers %}
+{%-       do webroots.append(nginx.lookup.webroot | path_join(server)) %}
+{%-     endfor %}
+{%-   endif %}
 Specified nginx webroot paths are absent:
   file.absent:
-    - names: {{ nginx.webroots }}
+    - names: {{ webroots | json }}
     - require:
       - sls: {{ sls_service_clean }}
 {%- endif %}
