@@ -186,6 +186,7 @@ def site(
     context=None,
     enabled=True,
     now=True,
+    **kwargs,
 ):
     """
     Manage a site served by nginx. This is currently a wrapper for other
@@ -229,20 +230,40 @@ def site(
         e.g. when nginx is not running.
     """
 
-    ret = {"name": name, "result": True, "comment": "", "changes": {}}
+    # https://docs.saltproject.io/en/latest/ref/states/writing.html#sub-state-runs
+    ret = {
+        "name": name,
+        "result": True,
+        "comment": "",
+        "changes": {},
+        "sub_state_run": [],
+    }
 
     site_file, enable_file = __utils__["nginx.get_site_enable_files"](
         name, nginx_conf, sites_enabled
     )
 
+    # Make sure to target the correct file with file.managed, depending
+    # on if the sites-available/-enabled pattern is in use or not.
+    if __utils__["nginx.uses_sites_enabled"](nginx_conf):
+        target_file = site_file
+    elif __salt__["nginx.site_exists"](
+        name, nginx_conf=nginx_conf, sites_enabled=sites_enabled
+    ):
+        target_file = (
+            enable_file
+            if __salt__["nginx.site_enabled"](
+                name, nginx_conf=nginx_conf, sites_enabled=sites_enabled
+            )
+            else site_file
+        )
+    else:
+        target_file = enable_file if enabled else site_file
+
     if source is not None:
-        # apparently there is a __states__ dunder @FIXME
         # https://docs.saltproject.io/en/latest/ref/states/writing.html#cross-calling-state-modules
-        # ret can also include sub_state_run
-        # https://docs.saltproject.io/en/latest/ref/states/writing.html#sub-state-runs
-        ret_file = __salt__["state.single"](
-            "file.managed",
-            str(site_file),
+        ret_file = __states__["file.managed"](
+            str(target_file),
             source=source,
             template=template,
             context=context,
@@ -251,24 +272,38 @@ def site(
             mode="0644",
             test=__opts__["test"],
         )
-        ret = list(ret_file.values())[0]
-        ret["name"] = name
+        ret_file["low"] = {
+            "name": str(target_file),
+            "state": "file",
+            "__id__": kwargs["__id__"],
+            "fun": "managed",
+        }
+        ret["sub_state_run"].append(ret_file)
 
-    if False == ret["result"]:
-        return ret
+        if False == ret_file["result"]:
+            ret["result"] = False
+            return ret
 
     site_state = site_enabled if enabled else site_disabled
 
-    ret_enable = site_state(name, nginx_conf, sites_enabled, now)
+    ret_site_state = site_state(name, nginx_conf, sites_enabled, now)
+    ret_site_state["low"] = {
+        "name": name,
+        "state": "nginx",
+        "__id__": kwargs["__id__"],
+        "fun": "site_enabled",
+    }
 
-    if False == ret_enable["result"]:
+    ret["sub_state_run"].append(ret_site_state)
+
+    if False == ret_site_state["result"]:
         ret["result"] = False
         ret[
             "comment"
         ] = "Site configuration file {} in correct state, but could not {} it. Make sure there are no errors in your nginx configuration. Output was:\n\n{}".format(
             "would be" if __opts__["test"] else "is",
             "enable" if enabled else "disable",
-            ret_enable["comment"],
+            ret_site_state["comment"],
         )
         if __opts__["test"]:
             if not site_file.exists():
@@ -281,8 +316,8 @@ def site(
                 ] += "\n\nIf you fixed some configuration errors since the last non-test run, you can probably ignore this warning."
         return ret
 
-    ret["comment"] += "\n\n" + ret_enable["comment"]
-    ret["changes"].update(ret_enable["changes"])
+    ret["comment"] += "\n\n" + ret_site_state["comment"]
+    ret["changes"].update(ret_site_state["changes"])
     return ret
 
 
