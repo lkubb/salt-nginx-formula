@@ -28,7 +28,7 @@ Nginx server {{ name }} is managed:
 {%-   if config.get("source") %}
     - source: {{ config.source }}
 {%-   else %}
-    - source: {{ files_switch([name, 'server.conf.j2'],
+    - source: {{ files_switch(["servers/" ~ name ~ ".conf", 'server.conf.j2'],
                               lookup='Nginx server ' ~ name ~ ' is managed'
                  )
               }}
