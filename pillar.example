@@ -71,6 +71,21 @@ nginx:
   #       - client_body_timeout: 300s
   #       - location /:
   #         - proxy_pass http://upstream
+    # Install scripts and services that manage session ticket keys.
+    # This works for systemd-based Linux distributions only.
+    # Mozilla generally advises to disable them since nginx does not rotate
+    # them automatically by default and thus breaks forward secrecy.
+    # The scripts and services that manage the rotation have been taken
+    # from https://github.com/GrapheneOS/nginx-rotate-session-ticket-keys
+    # They save four key files inside a ramfs mounted to
+    # dirname(lookup:config)/session-ticket-keys, usually /etc/nginx/sesion-ticket-keys
+    # Use them as follows:
+    #   ssl_session_ticket_key session-ticket-keys/4.key;
+    #   ssl_session_ticket_key session-ticket-keys/3.key;
+    #   ssl_session_ticket_key session-ticket-keys/2.key;
+    #   ssl_session_ticket_key session-ticket-keys/1.key;
+    # Mind that they are useless for TLS v1.3.
+  session_ticket_key_rotation: false
     # Make sure some snippets are available in lookup:snippets.
     # This works the exact same way as servers does above, except that
     # enabled and source_file_name are not respected.

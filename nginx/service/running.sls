@@ -14,3 +14,13 @@ nginx-service-running-service-running:
     - enable: True
     - watch:
       - sls: {{ sls_config_file }}
+
+{%- if nginx.session_ticket_key_rotation %}
+
+Nginx session ticket key rotation is running:
+  service.running:
+    - name: nginx-rotate-session-ticket-keys.timer
+    - enable: True
+    - require:
+      - sls: {{ sls_config_file }}
+{%- endif %}

@@ -1,0 +1,18 @@
+{%- set dir = salt["file.basename"](nginx.lookup.config) | path_join("session-ticket-keys") -%}
+#!/bin/bash
+
+# https://github.com/GrapheneOS/nginx-rotate-session-ticket-keys
+
+set -o errexit -o nounset -o pipefail
+
+umask 077
+
+mkdir -p {{ dir }}
+mount -t ramfs -o mode=700 ramfs {{ dir }}
+
+cd {{ dir }}
+
+openssl rand -out 1.key 80
+openssl rand -out 2.key 80
+openssl rand -out 3.key 80
+openssl rand -out 4.key 80

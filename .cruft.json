@@ -62,11 +62,12 @@
             ]
           }
         },
+        "disable_default_host": true,
         "dhparam": {},
         "servers": {},
+        "session_ticket_key_rotation": false,
         "snippets": {},
-        "webroots": [],
-        "disable_default_host": true
+        "webroots": []
       },
       "_template": "https://github.com/lkubb/salt-template-formula"
     }

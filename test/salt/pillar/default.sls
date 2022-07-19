@@ -41,6 +41,7 @@ nginx:
   dhparam: {}
   disable_default_host: true
   servers: {}
+  session_ticket_key_rotation: false
   snippets: {}
   webroots: []
 

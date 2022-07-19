@@ -1,0 +1,14 @@
+# https://github.com/GrapheneOS/nginx-rotate-session-ticket-keys
+
+[Unit]
+Description=Create nginx TLS session ticket keys
+Before=nginx.service
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/usr/local/bin/nginx-create-session-ticket-keys
+
+[Install]
+WantedBy=multi-user.target
