@@ -34,7 +34,8 @@
         "snippets": "snippets",
         "user": "nginx",
         "group": "nginx",
-        "pid_file": "/run/nginx.pid"
+        "pid_file": "/run/nginx.pid",
+        "remove_all_data_for_sure": false
       },
       "_settings": {
         "config": {
@@ -63,6 +64,7 @@
         "dhparam": {},
         "servers": {},
         "snippets": {},
+        "webroots": [],
         "disable_default_host": true
       },
       "_template": "https://github.com/lkubb/salt-template-formula"

@@ -16,6 +16,7 @@ nginx:
     pkg:
       name: nginx
       openssl: openssl
+    remove_all_data_for_sure: false
     snippets: snippets
     user: nginx
   config:
@@ -40,6 +41,7 @@ nginx:
   disable_default_host: true
   servers: {}
   snippets: {}
+  webroots: []
 
   tofs:
     # The files_switch key serves as a selector for alternative

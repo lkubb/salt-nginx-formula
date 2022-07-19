@@ -4,6 +4,7 @@
 include:
   - .servers.clean
   - .service.clean
+  - .webroots.clean
   - .snippets.clean
   - .config.clean
   - .certs.clean

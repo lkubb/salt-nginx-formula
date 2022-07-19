@@ -6,5 +6,6 @@ include:
   - .certs
   - .config
   - .snippets
+  - .webroots
   - .service
   - .servers
