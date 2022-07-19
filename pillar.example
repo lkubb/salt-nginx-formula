@@ -28,9 +28,52 @@ nginx:
     include:
       - modules-enabled/*.conf
     worker_processes: auto
+    # Manage dh params. Mapping of name to [str, dict].
+    # * If dict, will generate the file using openssl. Optional parameter is keysize,
+    #   which defaults to 2048 bits. Note that using custom DHE groups is deprecated.
+    # * If str, will use it as a source for file.managed (if "://" is found) or
+    #   use it as the parameter to contents_pillar.
   dhparam: {}
+    # Many distribution packages come with a default host. Automatically disable it.
   disable_default_host: true
+    # Mapping of server name to configuration. This will look for a file in TOFS
+    # salt://nginx/files/<tofs_var>/servers/[<server_name>.conf, server.conf.j2], where
+    # server_name is either the key in this dict or the value specified in
+    # `source_file_name`.
+    # If `default/server.conf.j2` is matched, the file will take the configuration
+    # specified in `config` and dump it in correct nginx syntax.
+    # If `source` is specified, that will be used as the source file instead of TOFS.
   servers: {}
+  # example.com:
+  #   enabled: true  # enabled defaults to false
+  # example.site:
+  #   source_file_name: frontend
+  # example.wtf:
+  #   source: salt://my/very/custom/example.wtf.j2
+  # host.it:
+  #   config:
+  #     - upstream:
+  #       - server 10.1.33.7:8000
+  #     - server:
+  #       - listen:
+  #         - 80
+  #         - '[::]:80'
+  #       - server_name: host.it
+  #       - return: 301 https://host.it$request_uri
+  #     - server:
+  #       - listen:
+  #           - 443
+  #           - '[::]:443'
+  #       - server_name: host.it
+  #       - root: /var/www/host.it
+  #       - server_tokens: 'off'
+  #       - client_max_body_size: 512M
+  #       - client_body_timeout: 300s
+  #       - location /:
+  #         - proxy_pass http://upstream
+    # Make sure some snippets are available in lookup:snippets.
+    # This works the exact same way as servers does above, except that
+    # enabled and source_file_name are not respected.
   snippets: {}
     # This is a convenience to automatically create webroot dirs,
     # e.g. when using certbot webroot auth module with reverse proxy only hosts.
