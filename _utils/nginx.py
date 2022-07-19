@@ -31,15 +31,15 @@ def default_config_file():
     Return the path of the default configuration file.
     """
 
-    cmd = [__detect_os(), '-t']
+    cmd = [__detect_os(), "-t"]
 
     # cannot use salt dunder in utils
-    process = subprocess.Popen(cmd,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     _, stderr = process.communicate()
 
-    file = re.findall(r"nginx: configuration file (.*) test (?:failed|is successful)", stderr.decode())
+    file = re.findall(
+        r"nginx: configuration file (.*) test (?:failed|is successful)", stderr.decode()
+    )
 
     if file:
         return Path(file[0])
@@ -87,6 +87,10 @@ def uses_sites_enabled(config=None):
     if not config.exists():
         return False
 
-    if re.findall(r"^[\s]+include (/etc/nginx/|)sites-enabled/\*;$", config.read_text(), re.MULTILINE):
+    if re.findall(
+        r"^[\s]+include (/etc/nginx/|)sites-enabled/\*;$",
+        config.read_text(),
+        re.MULTILINE,
+    ):
         return True
     return False
