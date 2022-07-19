@@ -8,14 +8,7 @@ nginx-package-install-pkg-installed:
   pkg.installed:
     - name: {{ nginx.lookup.pkg.name }}
 
+# Using the whitelist makes unlisted disappear. Just sync all modules.
 Custom nginx modules are synced:
-  module.run:
-    - saltutil.sync_all:
-      - refresh: true
-      - extmod_whitelist:
-          modules:
-            - nginx
-          states:
-            - nginx
-          utils:
-            - nginx
+  saltutil.sync_all:
+    - refresh: true
