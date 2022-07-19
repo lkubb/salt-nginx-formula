@@ -8,9 +8,12 @@
 include:
   - {{ sls_service_clean }}
 
+{%- if nginx.dhparam %}
+
 DH params are absent:
   file.absent:
     - names:
-{%- for name in nginx.dhparam %}
+{%-   for name in nginx.dhparam %}
       - {{ nginx.lookup.certs | path_join(name ~ ".pem") }}
-{%- endfor %}
+{%-   endfor %}
+{%- endif %}
