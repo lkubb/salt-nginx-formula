@@ -39,6 +39,34 @@ def __virtual__():
     )
 
 
+def _nginx_test_full(nginx_conf=None, refresh=False):
+    """
+    Helper function which leverages __context__ to keep from running
+    ``nginx -T`` more than once if unnecessary.
+    This prevents nginx from checking OCSP stapling servers every
+    time this is run, which is _a lot_ (DNS request as well).
+    Make sure to call this with refresh after something about the
+    configuration has changed.
+    """
+
+    contextkey = f"nginx._nginx_test.{nginx_conf}"
+
+    if contextkey not in __context__ or refresh:
+        cmd = [__detect_os(), "-T"]
+        if nginx_conf is not None:
+            cmd.extend(["-c", "'{}'".format(str(nginx_conf))])
+
+        out = __salt__["cmd.run_all"](" ".join(cmd))
+        if out["retcode"]:
+            raise CommandExecutionError(
+                "Error running nginx. Output:\n\n{}".format(out["stderr"])
+            )
+
+        __context__[contextkey] = out["stdout"]
+
+    return __context__[contextkey]
+
+
 def version():
     """
     Return server version from nginx -v
@@ -193,7 +221,7 @@ def disable_site(name, nginx_conf=None, sites_enabled=None):
         name, nginx_conf, sites_enabled
     )
 
-    if not site_file.exists():
+    if not(site_file.exists() or not sites_enabled and enable_file.exists()):
         raise CommandExecutionError("There is no site named {}.".format(name))
 
     # If an enabled site causes errors, listing all config files will be
@@ -216,7 +244,7 @@ def disable_site(name, nginx_conf=None, sites_enabled=None):
             "Enabling site failed, permission denied:\n\n{}".format(e)
         )
 
-    return str(enable_file) not in list_config_files(nginx_conf)
+    return str(enable_file) not in list_config_files(nginx_conf, refresh=True)
 
 
 def enable_site(name, nginx_conf=None, sites_enabled=None):
@@ -278,14 +306,14 @@ def enable_site(name, nginx_conf=None, sites_enabled=None):
         )
 
     try:
-        return str(enable_file) in list_config_files(nginx_conf)
+        return str(enable_file) in list_config_files(nginx_conf, refresh=True)
     except CommandExecutionError as e:
         # We caused that error with enabling the file since above, it was working. Disable it.
         disable_site(name, nginx_conf, sites_enabled)
         return False
 
 
-def list_config_files(nginx_conf=None):
+def list_config_files(nginx_conf=None, refresh=False):
     """
     Return a list of all active configuration files. This list is correct
     for a reloaded nginx and might be out of sync if the files have changed
@@ -303,19 +331,9 @@ def list_config_files(nginx_conf=None):
         Defaults to nginx default.
     """
 
-    cmd = [__detect_os(), "-T"]
+    out = _nginx_test_full(nginx_conf, refresh)
 
-    if nginx_conf is not None:
-        cmd.extend(["-c", "'{}'".format(str(nginx_conf))])
-
-    out = __salt__["cmd.run_all"](" ".join(cmd))
-
-    if out["retcode"]:
-        raise CommandExecutionError(
-            "Error running nginx. Output:\n\n{}".format(out["stderr"])
-        )
-
-    return re.findall(r"^# configuration file (.*):", out["stdout"], re.MULTILINE)
+    return re.findall(r"^# configuration file (.*):", out, re.MULTILINE)
 
 
 def remove_site(name, nginx_conf=None, sites_enabled=None):

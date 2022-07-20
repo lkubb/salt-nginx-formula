@@ -186,7 +186,6 @@ def site(
     context=None,
     enabled=True,
     now=True,
-    **kwargs,
 ):
     """
     Manage a site served by nginx. This is currently a wrapper for other
@@ -239,43 +238,57 @@ def site(
         "sub_state_run": [],
     }
 
+    # nginx.configtest was inherited from the Salt module and
+    # already returns a ret dict
+    if not __salt__["nginx.configtest"](nginx_conf)["result"]:
+        ret["result"] = False
+        ret[
+            "comment"
+        ] = "Your configuration is currently invalid. Managing sites is only possible based on a clean state. Please fix your configuration."
+        return ret
+
     site_file, enable_file = __utils__["nginx.get_site_enable_files"](
         name, nginx_conf, sites_enabled
     )
 
-    # Make sure to target the correct file with file.managed, depending
-    # on if the sites-available/-enabled pattern is in use or not.
-    if __utils__["nginx.uses_sites_enabled"](nginx_conf):
-        target_file = site_file
-    elif __salt__["nginx.site_exists"](
+    # Disable site temporarily without reloading configuration to make
+    # sure calls to the execution module succeed, even if the new file
+    # contains errors. This is necessitated by it needing a correct config
+    # file to be able to list enabled ones.
+    had_to_disable = False
+    if __salt__["nginx.site_exists"](
+        name, nginx_conf=nginx_conf, sites_enabled=sites_enabled
+    ) and __salt__["nginx.site_enabled"](
         name, nginx_conf=nginx_conf, sites_enabled=sites_enabled
     ):
-        target_file = (
-            enable_file
-            if __salt__["nginx.site_enabled"](
-                name, nginx_conf=nginx_conf, sites_enabled=sites_enabled
-            )
-            else site_file
+        ret_site_state = __states__["nginx.site_disabled"](
+            name,
+            nginx_conf=nginx_conf,
+            sites_enabled=sites_enabled,
         )
-    else:
-        target_file = enable_file if enabled else site_file
+        had_to_disable = True
+
+        # The site will not be disabled when run with test=true, therefore
+        # to check changes to the actual file for conf.d pattern, we need
+        # to adjust the target.
+        if __opts__["test"] and not __utils__["nginx.uses_sites_enabled"](nginx_conf):
+            site_file = enable_file
 
     if source is not None:
         # https://docs.saltproject.io/en/latest/ref/states/writing.html#cross-calling-state-modules
         ret_file = __states__["file.managed"](
-            str(target_file),
+            str(site_file),
             source=source,
             template=template,
             context=context,
             user="root",
             group=__salt__["user.primary_group"]("root"),
             mode="0644",
-            test=__opts__["test"],
         )
         ret_file["low"] = {
-            "name": str(target_file),
+            "name": str(site_file),
             "state": "file",
-            "__id__": kwargs["__id__"],
+            "__id__": __low__["__id__"],
             "fun": "managed",
         }
         ret["sub_state_run"].append(ret_file)
@@ -284,13 +297,35 @@ def site(
             ret["result"] = False
             return ret
 
+    if had_to_disable and enabled and not __opts__["test"]:
+        ret_reenable_after_changes = __states__["nginx.site_enabled"](
+            name, nginx_conf=nginx_conf, sites_enabled=sites_enabled
+        )
+
+        if not ret_reenable_after_changes["result"]:
+            ret["result"] = False
+            ret["comment"] = (
+                "The new configuration contained errors. Changes have been reverted.\n\n"
+                + ret_reenable_after_changes["comment"]
+            )
+            ret["changes"] = {}
+            ret["sub_state_run"] = []
+
+            __salt__["file.restore_backup"](str(site_file), 0)
+            # Since we checked before running anything, this has to succeed.
+            __states__["nginx.site_enabled"](
+                name, nginx_conf=nginx_conf, sites_enabled=sites_enabled
+            )
+
+            return ret
+
     site_state = site_enabled if enabled else site_disabled
 
     ret_site_state = site_state(name, nginx_conf, sites_enabled, now)
     ret_site_state["low"] = {
         "name": name,
         "state": "nginx",
-        "__id__": kwargs["__id__"],
+        "__id__": __low__["__id__"],
         "fun": "site_enabled",
     }
 
@@ -316,8 +351,8 @@ def site(
                 ] += "\n\nIf you fixed some configuration errors since the last non-test run, you can probably ignore this warning."
         return ret
 
-    ret["comment"] += "\n\n" + ret_site_state["comment"]
-    ret["changes"].update(ret_site_state["changes"])
+    # ret["comment"] += "\n\n" + ret_site_state["comment"]
+    # ret["changes"].update(ret_site_state["changes"])
     return ret
 
 
