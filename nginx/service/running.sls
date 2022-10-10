@@ -12,6 +12,7 @@ nginx-service-running-service-running:
   service.running:
     - name: {{ nginx.lookup.service.name }}
     - enable: True
+    - reload: true
     - watch:
       - sls: {{ sls_config_file }}
 
