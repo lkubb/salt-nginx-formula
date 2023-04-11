@@ -1,3 +1,5 @@
+{#- vim: ft=jinja #}
+
 {#- Render certs/snippets dirs relative to config root if not absolute -#}
 {%- for type in ["certs", "snippets"] %}
   {%- if not mapdata.lookup[type].startswith("/") %}

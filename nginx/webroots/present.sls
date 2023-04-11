@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 # vim: ft=sls
 
-{%- set tplroot = tpldir.split('/')[0] %}
-{%- set sls_package_install = tplroot ~ '.package.install' %}
+{%- set tplroot = tpldir.split("/")[0] %}
+{%- set sls_package_install = tplroot ~ ".package.install" %}
 {%- from tplroot ~ "/map.jinja" import mapdata as nginx with context %}
 
 include:
@@ -10,12 +9,12 @@ include:
 
 {%- if nginx.webroots %}
 {%-   set webroots = nginx.webroots %}
-{%-   if "from_servers" == nginx.webroots %}
+{%-   if nginx.webroots == "from_servers" %}
 {%-     set webroots = [] %}
 {%-     for server in nginx.servers %}
 {%-       do webroots.append(nginx.lookup.webroot | path_join(server)) %}
 {%-     endfor %}
-{%-   elif "from_certbot" == nginx.webroots %}
+{%-   elif nginx.webroots == "from_certbot" %}
 {%-     set webroots = [] %}
 {%-     from "certbot/map.jinja" import mapdata as certbot with context %}
 {%-     for cert in certbot.certs %}

@@ -1,8 +1,13 @@
-# -*- coding: utf-8 -*-
 # vim: ft=sls
 
-{%- set tplroot = tpldir.split('/')[0] %}
-{%- set sls_service_clean = tplroot ~ '.package.install' %}
+{#-
+    Removes configured webroot directories if
+    ``nginx.lookup.remove_all_data_for_sure`` is True.
+    Has a dependency on `nginx.service.clean`_.
+#}
+
+{%- set tplroot = tpldir.split("/")[0] %}
+{%- set sls_service_clean = tplroot ~ ".package.install" %}
 {%- from tplroot ~ "/map.jinja" import mapdata as nginx with context %}
 
 include:
@@ -12,12 +17,12 @@ include:
 
 {%- if nginx.webroots and nginx.lookup.remove_all_data_for_sure %}
 {%-   set webroots = nginx.webroots %}
-{%-   if "from_servers" == nginx.webroots %}
+{%-   if nginx.webroots == "from_servers" %}
 {%-     set webroots = [] %}
 {%-     for server in nginx.servers %}
 {%-       do webroots.append(nginx.lookup.webroot | path_join(server)) %}
 {%-     endfor %}
-{%-   elif "from_certbot" == nginx.webroots %}
+{%-   elif nginx.webroots == "from_certbot" %}
 {%-     set webroots = [] %}
 {%-     from "certbot/map.jinja" import mapdata as certbot with context %}
 {%-     for cert in certbot.certs %}

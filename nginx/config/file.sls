@@ -1,27 +1,26 @@
-# -*- coding: utf-8 -*-
 # vim: ft=sls
 
-{%- set tplroot = tpldir.split('/')[0] %}
-{%- set sls_package_install = tplroot ~ '.package.install' %}
+{%- set tplroot = tpldir.split("/")[0] %}
+{%- set sls_package_install = tplroot ~ ".package.install" %}
 {%- from tplroot ~ "/map.jinja" import mapdata as nginx with context %}
 {%- from tplroot ~ "/libtofs.jinja" import files_switch with context %}
 
 include:
   - {{ sls_package_install }}
 
-{%- if "sync" != nginx.config %}
+{%- if nginx.config != "sync" %}
 
-nginx-config-file-file-managed:
+Nginx configuration is managed:
   file.managed:
     - name: {{ nginx.lookup.config }}
-    - source: {{ files_switch(['nginx.conf', 'nginx.conf.j2'],
-                              lookup='nginx-config-file-file-managed'
+    - source: {{ files_switch(["nginx.conf", "nginx.conf.j2"],
+                              lookup="Nginx configuration is managed"
                  )
               }}
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: {{ nginx.lookup.rootgroup }}
-    - makedirs: True
+    - makedirs: true
     - template: jinja
     - require:
       - sls: {{ sls_package_install }}
@@ -30,18 +29,18 @@ nginx-config-file-file-managed:
 
 {%- else %}
 
-nginx-config-file-file-managed:
+Nginx configuration is managed:
   file.recurse:
     - name: {{ salt["file.dirname"](nginx.lookup.config) }}
-    - source: {{ files_switch(['/etc/nginx'],
-                              lookup='nginx-config-file-file-managed'
+    - source: {{ files_switch(["/etc/nginx"],
+                              lookup="Nginx configuration is managed"
                  )
               }}
     - file_mode: '0644'
     - dir_mode: '0755'
     - user: root
     - group: {{ nginx.lookup.rootgroup }}
-    - makedirs: True
+    - makedirs: true
     - template: jinja
     - include_empty: true
     - require:
