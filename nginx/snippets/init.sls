@@ -8,7 +8,7 @@
 {%- set tplroot = tpldir.split("/")[0] %}
 {%- set sls_package_install = tplroot ~ ".package.install" %}
 {%- from tplroot ~ "/map.jinja" import mapdata as nginx with context %}
-{%- from tplroot ~ "/libtofs.jinja" import files_switch with context %}
+{%- from tplroot ~ "/libtofsstack.jinja" import files_switch with context %}
 
 include:
   - {{ sls_package_install }}
@@ -27,9 +27,11 @@ Nginx snippets are managed:
     - names:
 {%-   for name in nginx.snippets %}
       - {{ nginx.lookup.snippets | path_join(name ~ ".conf") }}:
-        - source: {{ files_switch([name ~ ".conf", "snippet.conf.j2"],
-                                  lookup="Nginx snippet " ~ name ~ " is managed",
-                                  indent_width=10
+        - source: {{ files_switch(
+                        [name ~ ".conf", "snippet.conf.j2"],
+                        config=nginx,
+                        lookup="Nginx snippet " ~ name ~ " is managed",
+                        indent_width=10
                      )
                   }}
         - context:
@@ -38,7 +40,7 @@ Nginx snippets are managed:
     - mode: '0644'
     - user: root
     - group: {{ nginx.lookup.rootgroup }}
-    - makedirs: True
+    - makedirs: true
     - template: jinja
     - require:
       - file: {{ nginx.lookup.snippets }}

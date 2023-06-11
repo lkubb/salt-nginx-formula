@@ -2,7 +2,7 @@
 
 {#-
     Removes the nginx package.
-    Has a depency on `nginx.config.clean`_.
+    Has a dependency on `nginx.config.clean`_.
 #}
 
 {%- set tplroot = tpldir.split("/")[0] %}

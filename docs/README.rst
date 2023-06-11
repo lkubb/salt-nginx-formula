@@ -74,19 +74,6 @@ and manages server configurations.
 Installs the nginx package only.
 
 
-``nginx.config``
-^^^^^^^^^^^^^^^^
-Manages the nginx service configuration.
-Has a dependency on `nginx.package`_.
-
-
-``nginx.service``
-^^^^^^^^^^^^^^^^^
-Starts the nginx service (and session key rotation service, if configured)
-and enables it at boot time.
-Has a dependency on `nginx.config`_.
-
-
 ``nginx.certs``
 ^^^^^^^^^^^^^^^
 Generates Diffie-Hellman key exchange parameters, if requested.
@@ -94,10 +81,10 @@ This is discouraged.
 Has a dependency on `nginx.config`_.
 
 
-``nginx.servers``
-^^^^^^^^^^^^^^^^^
-Manages server configurations and their state (enabled/disabled).
-Has a dependency on `nginx.service`_.
+``nginx.config``
+^^^^^^^^^^^^^^^^
+Manages the nginx service configuration.
+Has a dependency on `nginx.package`_.
 
 
 ``nginx.snippets``
@@ -110,6 +97,19 @@ Has a dependency on `nginx.package`_.
 ^^^^^^^^^^^^^^^^^^
 Ensures configured webroot directories are present.
 Has a dependency on `nginx.package`_.
+
+
+``nginx.service``
+^^^^^^^^^^^^^^^^^
+Starts the nginx service (and session key rotation service, if configured)
+and enables it at boot time.
+Has a dependency on `nginx.config`_.
+
+
+``nginx.servers``
+^^^^^^^^^^^^^^^^^
+Manages server configurations and their state (enabled/disabled).
+Has a dependency on `nginx.service`_.
 
 
 ``nginx.clean``
@@ -128,19 +128,7 @@ generated DH params and then uninstalls the package.
 ``nginx.package.clean``
 ^^^^^^^^^^^^^^^^^^^^^^^
 Removes the nginx package.
-Has a depency on `nginx.config.clean`_.
-
-
-``nginx.config.clean``
-^^^^^^^^^^^^^^^^^^^^^^
-Removes the configuration of the nginx service and has a
-dependency on `nginx.service.clean`_.
-
-
-``nginx.service.clean``
-^^^^^^^^^^^^^^^^^^^^^^^
-Stops the nginx service (and session key rotation service, if configured)
-and disables it at boot time.
+Has a dependency on `nginx.config.clean`_.
 
 
 ``nginx.certs.clean``
@@ -149,9 +137,10 @@ Removes generated DH parameters.
 Has a dependency on `nginx.service.clean`_.
 
 
-``nginx.servers.clean``
-^^^^^^^^^^^^^^^^^^^^^^^
-Removes all managed server configurations.
+``nginx.config.clean``
+^^^^^^^^^^^^^^^^^^^^^^
+Removes the configuration of the nginx service and has a
+dependency on `nginx.service.clean`_.
 
 
 ``nginx.snippets.clean``
@@ -164,6 +153,17 @@ Removes all managed snippets.
 Removes configured webroot directories if
 ``nginx.lookup.remove_all_data_for_sure`` is True.
 Has a dependency on `nginx.service.clean`_.
+
+
+``nginx.service.clean``
+^^^^^^^^^^^^^^^^^^^^^^^
+Stops the nginx service (and session key rotation service, if configured)
+and disables it at boot time.
+
+
+``nginx.servers.clean``
+^^^^^^^^^^^^^^^^^^^^^^^
+Removes all managed server configurations.
 
 
 
