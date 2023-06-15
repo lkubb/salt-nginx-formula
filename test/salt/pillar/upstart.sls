@@ -42,6 +42,20 @@ nginx:
   servers: {}
   session_ticket_key_rotation: false
   snippets: {}
+  tls:
+    ca_certs: {}
+    cert_defaults:
+      ca_server: null
+      cn: null
+      days_remaining: 7
+      days_valid: 30
+      intermediate: []
+      root: ''
+      san: []
+      signing_cert: null
+      signing_policy: null
+      signing_private_key: null
+      signing_private_key_passphrase: null
   webroots: []
 
   tofs:

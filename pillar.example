@@ -42,6 +42,12 @@ nginx:
     # If `default/server.conf.j2` is matched, the file will take the configuration
     # specified in `config` and dump it in correct nginx syntax.
     # If `source` is specified, that will be used as the source file instead of TOFS.
+    # By setting `certs`, you can instruct this formula to generate certificates.
+    # It can be set to true, in which case a certificate + private key will be generated
+    # using the site name and defaults from `tls:cert_defaults`.
+    # Otherwise, set it to a list of certificate configuration mappings as seen there.
+    # Set `name` in the mapping to a distinct one.
+    # Defaults can be set in tls:cert_defaults.
   servers: {}
   # example.com:
   #   enabled: true  # enabled defaults to false
@@ -89,6 +95,26 @@ nginx:
     # This works the exact same way as servers does above, except that
     # enabled and source_file_name are not respected.
   snippets: {}
+    # Configure TLS-related parameters for this formula
+  tls:
+      # Certificates that should be dumped to `lookup:certs`/ca/`name`
+      # Mapping of file name to PEM contents or a list of PEM contents
+      # that will be concatenated.
+    ca_certs: {}
+      # Defaults for certificate generation parameters that are
+      # defined per server above.
+    cert_defaults:
+      ca_server: null
+      cn: null
+      days_remaining: 7
+      days_valid: 30
+      intermediate: []
+      root: ''
+      san: []
+      signing_cert: null
+      signing_policy: null
+      signing_private_key: null
+      signing_private_key_passphrase: null
     # This is a convenience to automatically create webroot dirs,
     # e.g. when using certbot webroot auth module with reverse proxy only hosts.
     # It can be a list of paths or one of ["from_servers", "from_certbot"].

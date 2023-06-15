@@ -76,9 +76,20 @@ Installs the nginx package only.
 
 ``nginx.certs``
 ^^^^^^^^^^^^^^^
-Generates Diffie-Hellman key exchange parameters, if requested.
+Generates certificates for servers that have ``certs`` set.
+Also generates Diffie-Hellman key exchange parameters, if requested.
 This is discouraged.
 Has a dependency on `nginx.config`_.
+
+
+``nginx.certs.dhparam``
+^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+``nginx.certs.managed``
+^^^^^^^^^^^^^^^^^^^^^^^
+
 
 
 ``nginx.config``
@@ -133,7 +144,7 @@ Has a dependency on `nginx.config.clean`_.
 
 ``nginx.certs.clean``
 ^^^^^^^^^^^^^^^^^^^^^
-Removes generated DH parameters.
+Removes generated certificates, private keys and DH parameters.
 Has a dependency on `nginx.service.clean`_.
 
 

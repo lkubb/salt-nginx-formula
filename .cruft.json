@@ -64,6 +64,22 @@
         },
         "disable_default_host": true,
         "dhparam": {},
+        "tls": {
+          "ca_certs": {},
+          "cert_defaults": {
+            "ca_server": null,
+            "cn": null,
+            "root": "",
+            "intermediate": [],
+            "san": [],
+            "signing_policy": null,
+            "signing_private_key": null,
+            "signing_private_key_passphrase": null,
+            "signing_cert": null,
+            "days_remaining": 7,
+            "days_valid": 30
+          }
+        },
         "servers": {},
         "session_ticket_key_rotation": false,
         "snippets": {},
