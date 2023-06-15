@@ -9,7 +9,8 @@
     stops the service,
     removes webroots if ``nginx.lookup.remove_all_data_for_sure`` is True,
     removes snippets, the configuration file and possibly
-    generated DH params and then uninstalls the package.
+    generated DH params and then uninstalls the package
+    and possibly repository.
 #}
 
 include:

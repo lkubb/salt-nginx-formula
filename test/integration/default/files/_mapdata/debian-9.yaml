@@ -8,6 +8,8 @@ values:
   lookup:
     arch: amd64
     rootgroup: root
+    enablerepo:
+      stable: true
     config: '/etc/nginx/nginx.conf'
     service:
       name: nginx
@@ -41,6 +43,7 @@ values:
     worker_processes: auto
   dhparam: {}
   disable_default_host: true
+  install_method: pkg
   servers: {}
   session_ticket_key_rotation: false
   snippets: {}

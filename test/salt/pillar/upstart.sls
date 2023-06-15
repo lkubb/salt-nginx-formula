@@ -6,6 +6,8 @@ nginx:
     # Just for testing purposes
     winner: lookup
     added_in_lookup: lookup_value
+    enablerepo:
+      stable: true
     config: '/etc/nginx/nginx.conf'
     service:
       name: nginx
@@ -39,6 +41,7 @@ nginx:
     worker_processes: auto
   dhparam: {}
   disable_default_host: true
+  install_method: pkg
   servers: {}
   session_ticket_key_rotation: false
   snippets: {}

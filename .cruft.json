@@ -19,7 +19,7 @@
       "abbr": "nginx",
       "abbr_pysafe": "nginx",
       "pkg": "",
-      "needs_repo": "",
+      "needs_repo": "y",
       "config": "/etc/nginx/nginx.conf",
       "service": "nginx",
       "subcomponent": "",
@@ -39,6 +39,7 @@
         "webroot": "/var/www"
       },
       "settings": {
+        "install_method": "pkg",
         "config": {
           "worker_processes": "auto",
           "include": [

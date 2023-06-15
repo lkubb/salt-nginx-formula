@@ -1,7 +1,7 @@
 # vim: ft=sls
 
 {#-
-    Removes the nginx package.
+    Removes the nginx package and nginx repositories.
     Has a dependency on `nginx.config.clean`_.
 #}
 

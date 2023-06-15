@@ -1,0 +1,10 @@
+# vim: ft=yaml
+---
+values:
+  lookup:
+    repos:
+      stable:
+        baseurl: http://nginx.org/packages/amzn2/$releasever/$basearch/
+      mainline:
+        baseurl: http://nginx.org/packages/mainline/amzn2/$releasever/$basearch/
+...

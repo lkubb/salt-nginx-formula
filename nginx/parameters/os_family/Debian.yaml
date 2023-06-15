@@ -15,4 +15,21 @@ values:
     pkg_manager: apt
     user: www-data
     group: www-data
+    repos:
+      stable:
+        humanname: Nginx stable
+        name: >
+          deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg]
+          http://nginx.org/packages/debian {{ grains.oscodename }} nginx"
+        key_url: https://nginx.org/keys/nginx_signing.key
+        file: /etc/apt/sources.list.d/nginx.list
+        aptkey: false
+      mainline:
+        humanname: Nginx mainline
+        name: >
+          deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg]
+          http://nginx.org/packages/mainline/debian {{ grains.oscodename }} nginx"
+        key_url: https://nginx.org/keys/nginx_signing.key
+        file: /etc/apt/sources.list.d/nginx.list
+        aptkey: false
 ...

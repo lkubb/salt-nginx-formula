@@ -3,7 +3,7 @@
 {#-
     *Meta-state*.
 
-    This installs the nginx package,
+    This installs the nginx package and possibly repository,
     manages the nginx configuration file
     plus snippets, manages webroot dirs,
     generates DH params if requested (discouraged),

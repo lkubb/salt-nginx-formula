@@ -13,4 +13,19 @@
 values:
   lookup:
     pkg_manager: yum
+    repos:
+      stable:
+        humanname: Nginx stable
+        name: nginx-stable
+        baseurl: http://nginx.org/packages/centos/$releasever/$basearch/
+        gpgkey: https://nginx.org/keys/nginx_signing.key
+        gpgcheck: 1
+        module_hotfixes: true
+      mainline:
+        humanname: Nginx mainline
+        name: nginx-mainline
+        baseurl: http://nginx.org/packages/mainline/centos/$releasever/$basearch/
+        gpgkey: https://nginx.org/keys/nginx_signing.key
+        gpgcheck: 1
+        module_hotfixes: true
 ...

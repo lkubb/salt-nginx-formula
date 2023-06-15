@@ -1,0 +1,13 @@
+# vim: ft=yaml
+---
+values:
+  lookup:
+    repos:
+      stable:
+        name: >
+          deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg]
+          http://nginx.org/packages/ubuntu {{ grains.oscodename }} nginx"
+      mainline:
+        name: >
+          deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg]
+          http://nginx.org/packages/mainline/ubuntu {{ grains.oscodename }} nginx"

@@ -11,7 +11,7 @@ The following states are found in this formula:
 ^^^^^^^^^
 *Meta-state*.
 
-This installs the nginx package,
+This installs the nginx package and possibly repository,
 manages the nginx configuration file
 plus snippets, manages webroot dirs,
 generates DH params if requested (discouraged),
@@ -22,6 +22,14 @@ and manages server configurations.
 ``nginx.package``
 ^^^^^^^^^^^^^^^^^
 Installs the nginx package only.
+If installation from repo is configured, will also
+configure the selected repo.
+
+
+``nginx.package.repo``
+^^^^^^^^^^^^^^^^^^^^^^
+This state will install the configured nginx repository.
+This works for apt/dnf/yum/zypper-based distributions only by default.
 
 
 ``nginx.certs``
@@ -83,13 +91,20 @@ removes managed server configurations,
 stops the service,
 removes webroots if ``nginx.lookup.remove_all_data_for_sure`` is True,
 removes snippets, the configuration file and possibly
-generated DH params and then uninstalls the package.
+generated DH params and then uninstalls the package
+and possibly repository.
 
 
 ``nginx.package.clean``
 ^^^^^^^^^^^^^^^^^^^^^^^
-Removes the nginx package.
+Removes the nginx package and nginx repositories.
 Has a dependency on `nginx.config.clean`_.
+
+
+``nginx.package.repo.clean``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This state will remove the configured nginx repository.
+This works for apt/dnf/yum/zypper-based distributions only by default.
 
 
 ``nginx.certs.clean``

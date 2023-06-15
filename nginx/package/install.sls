@@ -3,6 +3,12 @@
 {%- set tplroot = tpldir.split("/")[0] %}
 {%- from tplroot ~ "/map.jinja" import mapdata as nginx with context %}
 
+{%- if nginx.install_method == "repo" %}
+
+include:
+  - {{ slsdotpath }}.repo
+{%- endif %}
+
 Nginx is installed:
   pkg.installed:
     - name: {{ nginx.lookup.pkg.name }}
