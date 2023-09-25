@@ -13,10 +13,11 @@ Nginx is installed:
   pkg.installed:
     - name: {{ nginx.lookup.pkg.name }}
 
-# Using the whitelist makes unlisted disappear. Just sync all modules.
 Custom nginx modules are synced:
   saltutil.sync_all:
     - refresh: true
+    - unless:
+      - '{{ ("nginx" in salt["saltutil.list_extmods"]().get("states", [])) | lower }}'
 
 {%- if nginx.session_ticket_key_rotation %}
 
