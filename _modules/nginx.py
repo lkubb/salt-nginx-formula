@@ -2,21 +2,13 @@
 Support for nginx
 """
 
-from pathlib import Path
 import re
+import shlex
 import urllib.request
 
 import salt.utils.decorators as decorators
 import salt.utils.path
-
 from salt.exceptions import CommandExecutionError
-
-try:
-    import crossplane
-
-    HAS_CROSSPLANE = True
-except ImportError:
-    HAS_CROSSPLANE = False
 
 
 # Cache the output of running which('nginx') so this module
@@ -77,7 +69,7 @@ def version():
 
         salt '*' nginx.version
     """
-    cmd = "{} -v".format(__detect_os())
+    cmd = f"{__detect_os()} -v"
     out = __salt__["cmd.run"](cmd).splitlines()
     ret = out[0].rsplit("/", maxsplit=1)
     return ret[-1]
@@ -94,7 +86,7 @@ def build_info():
         salt '*' nginx.build_info
     """
     ret = {"info": []}
-    out = __salt__["cmd.run"]("{} -V".format(__detect_os()))
+    out = __salt__["cmd.run"](f"{__detect_os()} -V")
 
     for i in out.splitlines():
         if i.startswith("configure argument"):
@@ -125,9 +117,9 @@ def configtest(nginx_conf=None):
     cmd = [__detect_os(), "-t"]
 
     if nginx_conf:
-        cmd.extend(["-c", "'{}'".format(nginx_conf)])
+        cmd.extend(["-c", nginx_conf])
 
-    out = __salt__["cmd.run_all"](" ".join(cmd))
+    out = __salt__["cmd.run_all"](shlex.join(cmd))
 
     if out["retcode"] != 0:
         ret["comment"] = "Syntax Error"
@@ -221,7 +213,7 @@ def disable_site(name, nginx_conf=None, sites_enabled=None):
         name, nginx_conf, sites_enabled
     )
 
-    if not(site_file.exists() or not sites_enabled and enable_file.exists()):
+    if not (site_file.exists() or not sites_enabled and enable_file.exists()):
         raise CommandExecutionError("There is no site named {}.".format(name))
 
     # If an enabled site causes errors, listing all config files will be
@@ -240,9 +232,7 @@ def disable_site(name, nginx_conf=None, sites_enabled=None):
         elif not sites_enabled:
             enable_file.rename(site_file)
     except PermissionError as e:
-        raise CommandExecutionError(
-            "Enabling site failed, permission denied:\n\n{}".format(e)
-        )
+        raise CommandExecutionError(f"Enabling site failed, permission denied:\n\n{e}")
 
     return str(enable_file) not in list_config_files(nginx_conf, refresh=True)
 
@@ -288,7 +278,7 @@ def enable_site(name, nginx_conf=None, sites_enabled=None):
 
     if not site_file.exists():
         raise CommandExecutionError(
-            "Could not find site configuration file '{}'.".format(str(site_file))
+            f"Could not find site configuration file '{site_file}'."
         )
 
     if sites_enabled:
@@ -301,13 +291,11 @@ def enable_site(name, nginx_conf=None, sites_enabled=None):
     try:
         enable_command(target)
     except PermissionError as e:
-        raise CommandExecutionError(
-            "Enabling site failed, permission denied:\n\n{}".format(e)
-        )
+        raise CommandExecutionError(f"Enabling site failed, permission denied:\n\n{e}")
 
     try:
         return str(enable_file) in list_config_files(nginx_conf, refresh=True)
-    except CommandExecutionError as e:
+    except CommandExecutionError:
         # We caused that error with enabling the file since above, it was working. Disable it.
         disable_site(name, nginx_conf, sites_enabled)
         return False
@@ -378,7 +366,7 @@ def remove_site(name, nginx_conf=None, sites_enabled=None):
             site_file.unlink()
         except PermissionError as e:
             raise CommandExecutionError(
-                "Removing site failed, permission denied:\n\n{}".format(e)
+                f"Removing site failed, permission denied:\n\n{e}"
             )
 
     return True
@@ -397,20 +385,20 @@ def signal(signal=None):
     valid_signals = ("start", "reopen", "stop", "quit", "reload")
 
     if signal not in valid_signals:
-        raise CommandExecutionError("Signal '{}' is invalid.".format(signal))
+        raise CommandExecutionError(f"Signal '{signal}' is invalid.")
 
     # Make sure you use the right arguments
     if signal == "start":
         arguments = ""
     else:
-        arguments = " -s {}".format(signal)
+        arguments = f" -s {signal}"
     cmd = __detect_os() + arguments
     out = __salt__["cmd.run_all"](cmd)
 
     # A non-zero return code means fail
     if out["retcode"]:
         raise CommandExecutionError(
-            "Failed signaling '{}' to nginx:\n\n{}".format(signal, out["stderr"])
+            f"Failed signaling '{signal}' to nginx:\n\n{out['stderr']}"
         )
 
     return True
