@@ -131,6 +131,8 @@ nginx:
   lookup:
     certs: certs
     group: nginx
+      # This allows you to make the nginx user part of miscellaneous groups
+    groups_extra: []
     pid_file: /run/nginx.pid
     pkg:
       name: nginx
@@ -139,6 +141,7 @@ nginx:
     snippets: snippets
     user: nginx
     webroot: /var/www
+    workdir: /var/lib/nginx
 
   tofs:
       # The files_switch key serves as a selector for alternative

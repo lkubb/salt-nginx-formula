@@ -13,6 +13,7 @@ nginx:
       name: nginx
     certs: certs
     group: nginx
+    groups_extra: []
     pid_file: /run/nginx.pid
     pkg:
       name: nginx
@@ -21,6 +22,7 @@ nginx:
     snippets: snippets
     user: nginx
     webroot: /var/www
+    workdir: /var/lib/nginx
   config:
     events:
       worker_connections: 768

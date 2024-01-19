@@ -13,6 +13,27 @@ Nginx is installed:
   pkg.installed:
     - name: {{ nginx.lookup.pkg.name }}
 
+Nginx user/group is present:
+  user.present:
+    - name: {{ nginx.lookup.user }}
+    - home: {{ nginx.lookup.workdir }}
+    - shell: /sbin/nologin
+    - empty_password: true
+    - fullname: Nginx web server
+    - system: true
+    - usergroup: {{ nginx.lookup.group == nginx.lookup.user }}
+{%- if nginx.lookup.groups_extra %}
+    - groups: {{ nginx.lookup.groups_extra | json }}
+{%- endif %}
+{%- if nginx.lookup.group != nginx.lookup.user %}
+    - gid: {{ nginx.lookup.group }}
+    - require:
+      - group: {{ nginx.lookup.group }}
+  group.present:
+    - name: {{ nginx.lookup.group }}
+    - system: true
+{%- endif %}
+
 Custom nginx modules are synced:
   saltutil.sync_all:
     - refresh: true

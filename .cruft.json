@@ -34,9 +34,11 @@
         "snippets": "snippets",
         "user": "nginx",
         "group": "nginx",
+        "groups_extra": [],
         "pid_file": "/run/nginx.pid",
         "remove_all_data_for_sure": false,
-        "webroot": "/var/www"
+        "webroot": "/var/www",
+        "workdir": "/var/lib/nginx"
       },
       "settings": {
         "install_method": "pkg",
