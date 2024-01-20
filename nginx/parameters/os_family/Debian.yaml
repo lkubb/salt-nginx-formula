@@ -15,6 +15,7 @@ values:
     pkg_manager: apt
     user: www-data
     group: www-data
+    workdir: /var/www
     repos:
       stable:
         humanname: Nginx stable
