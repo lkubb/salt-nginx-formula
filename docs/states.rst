@@ -61,6 +61,16 @@ Manages the nginx service configuration.
 Has a dependency on `nginx.package`_.
 
 
+``nginx.config.file``
+^^^^^^^^^^^^^^^^^^^^^
+
+
+
+``nginx.config.selinux``
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
 ``nginx.snippets``
 ^^^^^^^^^^^^^^^^^^
 Manages Nginx snippets.

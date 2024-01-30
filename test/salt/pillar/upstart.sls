@@ -44,6 +44,8 @@ nginx:
   dhparam: {}
   disable_default_host: true
   install_method: pkg
+  selinux:
+    httpd_can_network_connect: null
   servers: {}
   session_ticket_key_rotation: false
   snippets: {}

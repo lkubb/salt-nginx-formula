@@ -80,6 +80,11 @@ nginx:
   #       - client_body_timeout: 300s
   #       - location /:
   #         - proxy_pass http://upstream
+    # Relevant SELinux settings. If left at `null`, will not be managed.
+    # Set to true/false to enable/disable explicitly.
+  selinux:
+      # This needs to be activated for nginx to act as a reverse proxy.
+    httpd_can_network_connect: null
     # Install scripts and services that manage session ticket keys.
     # This works for systemd-based Linux distributions only.
     # Mozilla generally advises to disable them since nginx does not rotate

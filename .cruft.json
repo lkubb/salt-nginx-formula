@@ -84,6 +84,9 @@
           },
           "generate_snakeoil": false
         },
+        "selinux": {
+          "httpd_can_network_connect": null
+        },
         "servers": {},
         "session_ticket_key_rotation": false,
         "snippets": {},
