@@ -61,6 +61,7 @@ nginx:
       signing_policy: null
       signing_private_key: null
       signing_private_key_passphrase: null
+    generate_snakeoil: false
   webroots: []
 
   tofs:

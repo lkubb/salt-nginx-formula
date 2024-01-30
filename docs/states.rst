@@ -50,6 +50,11 @@ Has a dependency on `nginx.config`_.
 
 
 
+``nginx.certs.snakeoil``
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
 ``nginx.config``
 ^^^^^^^^^^^^^^^^
 Manages the nginx service configuration.

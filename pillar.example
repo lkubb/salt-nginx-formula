@@ -119,6 +119,8 @@ nginx:
       signing_policy: null
       signing_private_key: null
       signing_private_key_passphrase: null
+      # Generate a self-signed snakeoil certificate in <lookup:certs>/snakeoil.(key|pem)
+    generate_snakeoil: false
     # This is a convenience to automatically create webroot dirs,
     # e.g. when using certbot webroot auth module with reverse proxy only hosts.
     # It can be a list of paths or one of ["from_servers", "from_certbot"].

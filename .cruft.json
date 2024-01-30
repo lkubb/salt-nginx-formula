@@ -81,7 +81,8 @@
             "signing_cert": null,
             "days_remaining": 7,
             "days_valid": 30
-          }
+          },
+          "generate_snakeoil": false
         },
         "servers": {},
         "session_ticket_key_rotation": false,
